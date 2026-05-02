@@ -1,0 +1,16 @@
+.env
+.envrc
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+demo_assets/cached_outputs/*.json
+demo_assets/videos/*.mp4
+node_modules/
+.DS_Store
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+hackathon-host-api-keys-and-info.md

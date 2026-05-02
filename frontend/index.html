@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyAugment — Aerial Edge-Case Generator</title>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161a23;
+      --surface2: #1e2332;
+      --border: #2a3047;
+      --accent: #4f8ef7;
+      --accent2: #7c4dff;
+      --success: #2dd4a0;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --text-muted: #8892a4;
+      --radius: 10px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ---- Header ---- */
+    header {
+      background: linear-gradient(135deg, #0d1220 0%, #111827 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    .logo-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-text p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .cost-badge {
+      margin-left: auto;
+      background: linear-gradient(135deg, #1a2540, #1e2d3d);
+      border: 1px solid #2a4060;
+      border-radius: 20px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.75rem;
+      color: var(--success);
+      white-space: nowrap;
+    }
+
+    .cost-badge span.muted {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    /* ---- Main layout ---- */
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ---- Panel ---- */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .panel h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* ---- Upload zone ---- */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(79,142,247,0.06);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .upload-zone p { color: var(--text-muted); font-size: 0.85rem; }
+    .upload-zone .upload-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; opacity: 0.7; }
+
+    #preview-img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    /* ---- Textarea ---- */
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 90px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    /* ---- Quick picks ---- */
+    .quick-picks {
+      margin: 1rem 0;
+    }
+
+    .quick-picks p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .quick-picks-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .qpick {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .qpick:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(79,142,247,0.08);
+    }
+
+    /* ---- Generate button ---- */
+    .btn-generate {
+      width: 100%;
+      margin-top: 1.25rem;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-generate:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    .btn-generate:active:not(:disabled) { transform: translateY(0); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ---- Progress ---- */
+    .progress-wrap {
+      display: none;
+      margin-top: 1.25rem;
+    }
+
+    .progress-wrap.visible { display: block; }
+
+    .progress-bar-bg {
+      background: var(--surface2);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .progress-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ---- Gallery ---- */
+    .gallery-wrap {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 80px);
+    }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-shrink: 0;
+    }
+
+    .gallery-header h2 { font-size: 1.1rem; color: var(--text); }
+
+    .gallery-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--surface2);
+      padding: 0.2rem 0.7rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: min-content;
+      gap: 0.75rem;
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 4px;
+    }
+
+    .gallery-grid::-webkit-scrollbar { width: 6px; }
+    .gallery-grid::-webkit-scrollbar-track { background: var(--surface2); border-radius: 3px; }
+    .gallery-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .vid-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeIn 0.3s ease;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .vid-card:hover { border-color: var(--accent); }
+    .vid-card.new-result { border-color: var(--success); box-shadow: 0 0 12px rgba(45,212,160,0.2); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .vid-thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #0a0c12;
+      overflow: hidden;
+    }
+
+    .vid-thumb video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .vid-meta {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .vid-meta p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 2rem;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 1rem;
+      grid-column: 1 / -1;
+    }
+
+    .empty-state .icon { font-size: 3.5rem; opacity: 0.4; }
+    .empty-state p { font-size: 0.9rem; max-width: 340px; }
+
+    /* ---- Scenario JSON accordion ---- */
+    .scenario-accordion {
+      border-top: 1px solid var(--border);
+    }
+
+    .scenario-toggle {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-align: left;
+      transition: color 0.2s;
+    }
+
+    .scenario-toggle:hover { color: var(--accent); }
+
+    .scenario-toggle .arrow {
+      transition: transform 0.2s;
+      font-size: 0.7rem;
+    }
+
+    .scenario-toggle.open .arrow { transform: rotate(90deg); }
+
+    .scenario-body {
+      display: none;
+      padding: 0 1.25rem 1.25rem;
+    }
+
+    .scenario-body.open { display: block; }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .scenario-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+    }
+
+    .scenario-item .key {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .scenario-item .val {
+      font-size: 0.78rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* ---- How it works ---- */
+    .how-it-works {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1.5rem 2rem;
+    }
+
+    .how-toggle {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-align: left;
+    }
+
+    .how-toggle:hover { color: var(--text); }
+    .how-toggle .arrow { margin-left: auto; transition: transform 0.2s; }
+    .how-toggle.open .arrow { transform: rotate(180deg); }
+
+    .how-body {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 1.5rem;
+    }
+
+    .how-body.open { display: block; }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .steps { grid-template-columns: 1fr; }
+    }
+
+    .step {
+      text-align: center;
+      padding: 1.25rem;
+      background: var(--surface2);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .step::after {
+      content: '→';
+      position: absolute;
+      right: -1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+      color: var(--border);
+    }
+
+    .step:last-child::after { display: none; }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin: 0 auto 0.75rem;
+    }
+
+    .step h3 { font-size: 0.95rem; margin-bottom: 0.4rem; }
+    .step p { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* ---- Error toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #2d1a1a;
+      border: 1px solid var(--danger);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-size: 0.85rem;
+      color: #fca5a5;
+      max-width: 360px;
+      z-index: 999;
+      box-shadow: var(--shadow);
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0); opacity: 1; }
+    }
+
+    .toast.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🛸</div>
+  <div class="header-text">
+    <h1>SkyAugment</h1>
+    <p>Aerial Edge-Case Generator — Powered by Seedance 2.0 + Z.AI</p>
+  </div>
+  <div class="cost-badge">
+    <span class="muted">Real flight data: ~$500/hr</span>&nbsp;&nbsp;SkyAugment: ~$0.50/clip
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ---- LEFT PANEL ---- -->
+  <div>
+    <div class="panel">
+      <h2>Input</h2>
+
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*,video/*" />
+        <div class="upload-icon">📷</div>
+        <p>Drop simulation frame or click to upload</p>
+        <p class="upload-hint">PNG, JPG, MP4 · Drop to replace default frame</p>
+      </div>
+
+      <img id="preview-img" alt="preview" />
+
+      <textarea
+        id="prompt-input"
+        placeholder="Describe an edge case scenario (e.g. 'dust storm at low sun angle over desert')"
+        rows="4"
+      ></textarea>
+
+      <div class="quick-picks">
+        <p>Quick picks:</p>
+        <div class="quick-picks-list" id="quick-picks-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <button class="btn-generate" id="generate-btn" onclick="handleGenerate()">
+        ✦ Generate Variants
+      </button>
+
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-label" id="progress-label">Initialising…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- RIGHT / GALLERY ---- -->
+  <div class="gallery-wrap">
+    <div class="gallery-header">
+      <h2>Generated Videos</h2>
+      <div class="gallery-count" id="gallery-count">0 videos</div>
+    </div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="empty-state">
+        <div class="icon">🌌</div>
+        <p>Generated videos will appear here. Enter a scenario and hit Generate.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ---- HOW IT WORKS ---- -->
+<div class="how-it-works">
+  <button class="how-toggle" id="how-toggle" onclick="toggleHow()">
+    <span>⚙</span> How it works
+    <span class="arrow">▼</span>
+  </button>
+  <div class="how-body" id="how-body">
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Gazebo Sim</h3>
+        <p>Synthetic simulation frames captured from ROS/Gazebo flight scenarios — cheap, repeatable, edge-case rich.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Z.AI Scenario Reasoner</h3>
+        <p>GLM-4 expands a short description into structured environmental parameters: lighting, weather, terrain, atmospheric effects, and camera artifacts.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Seedance 2.0 Reference-to-Video</h3>
+        <p>BytePlus Seedance 2.0 synthesises photorealistic video from the sim frame + expanded prompt — generating diverse, labelled training data at $0.50/clip.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '';  // relative — works on any host
+
+  // ---- State ----
+  let selectedFile = null;
+  let scenarios = [];
+
+  // ---- Default image ----
+  async function loadDefaultImage() {
+    const res = await fetch('/static/highwayflyover.png');
+    const blob = await res.blob();
+    const file = new File([blob], 'highwayflyover.png', { type: 'image/png' });
+    handleFile(file);
+  }
+
+  // ---- Init ----
+  async function init() {
+    loadDefaultImage();
+    loadGallery();
+    try {
+      const res = await fetch(`${API}/api/scenarios`);
+      const data = await res.json();
+      scenarios = data.scenarios || [];
+      renderQuickPicks(scenarios);
+    } catch (e) {
+      console.warn('Could not load scenarios:', e);
+    }
+  }
+
+  function renderQuickPicks(items) {
+    const list = document.getElementById('quick-picks-list');
+    list.innerHTML = '';
+    items.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'qpick';
+      btn.textContent = s;
+      btn.onclick = () => { document.getElementById('prompt-input').value = s; };
+      list.appendChild(btn);
+    });
+  }
+
+  // ---- File upload ----
+  const uploadZone = document.getElementById('upload-zone');
+  const fileInput = document.getElementById('file-input');
+  const previewImg = document.getElementById('preview-img');
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+  });
+
+  function handleFile(file) {
+    selectedFile = file;
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewImg.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    } else {
+      previewImg.style.display = 'none';
+    }
+  }
+
+  // ---- Generate ----
+  let _progressTimer = null;
+
+  function startProgressAnimation() {
+    const stages = [
+      [5,  'Expanding scenario with Z.AI…'],
+      [20, 'Submitting frames to Seedance 2.0…'],
+      [38, 'Seedance generating variant 1…'],
+      [52, 'Seedance generating variant 2…'],
+      [66, 'Seedance generating variant 3…'],
+      [80, 'Polling for completed videos…'],
+    ];
+    let idx = 0;
+    let pulse = 82;
+    let pulseDir = 1;
+    showProgress(true, stages[0][1], stages[0][0]);
+    _progressTimer = setInterval(() => {
+      if (idx < stages.length - 1) {
+        idx++;
+        showProgress(true, stages[idx][1], stages[idx][0]);
+      } else {
+        pulse += pulseDir * 2;
+        if (pulse >= 94 || pulse <= 81) pulseDir *= -1;
+        showProgress(true, 'Waiting for Seedance to finish… (60–90s is normal)', pulse);
+      }
+    }, 2000);
+  }
+
+  function stopProgressAnimation() {
+    clearInterval(_progressTimer);
+    _progressTimer = null;
+  }
+
+  async function handleGenerate() {
+    const prompt = document.getElementById('prompt-input').value.trim();
+    if (!prompt) { showToast('Please enter a scenario description.'); return; }
+
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    startProgressAnimation();
+
+    const form = new FormData();
+    form.append('prompt', prompt);
+    if (selectedFile) form.append('image', selectedFile);
+
+    try {
+      const res = await fetch(`${API}/api/generate`, { method: 'POST', body: form });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || `HTTP ${res.status}`);
+      }
+
+      stopProgressAnimation();
+      showProgress(true, 'Done!', 100);
+      const data = await res.json();
+      await sleep(300);
+      showProgress(false);
+      renderVariants(data.variants || []);
+    } catch (e) {
+      stopProgressAnimation();
+      showProgress(false);
+      showToast(`Generation failed: ${e.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ---- Gallery ----
+  let allVideos = [];
+
+  async function loadGallery() {
+    try {
+      const res = await fetch('/api/videos');
+      const data = await res.json();
+      allVideos = data.videos || [];
+      renderGallery(allVideos);
+    } catch(e) { console.warn('Gallery load failed:', e); }
+  }
+
+  function renderGallery(videos, newKeys = []) {
+    const grid = document.getElementById('gallery-grid');
+    const countEl = document.getElementById('gallery-count');
+    countEl.textContent = `${videos.length} video${videos.length !== 1 ? 's' : ''}`;
+
+    if (!videos.length) {
+      grid.innerHTML = `<div class="empty-state"><div class="icon">🌌</div><p>Generated videos will appear here. Enter a scenario and hit Generate.</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = '';
+    videos.forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'vid-card' + (newKeys.includes(v.video_url) ? ' new-result' : '');
+
+      card.innerHTML = `
+        <div class="vid-thumb">
+          <video src="${escHtml(v.video_url)}" muted playsinline preload="metadata"
+            onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0"></video>
+        </div>
+        <div class="vid-meta">
+          <p title="${escHtml(v.prompt)}">${escHtml(v.prompt.replace(/^Aerial drone footage[,.]?\s*/i,'').substring(0,80))}…</p>
+        </div>
+      `;
+
+      // Click to open full controls
+      card.querySelector('video').addEventListener('click', function(e) {
+        e.stopPropagation();
+        this.controls = !this.controls;
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function renderVariants(variants) {
+    const newKeys = variants.filter(v => v.video_url).map(v => v.video_url);
+    loadGallery().then(() => {
+      // Highlight newly added ones
+      renderGallery(allVideos, newKeys);
+      // Scroll grid to top so new results are visible
+      document.getElementById('gallery-grid').scrollTop = 0;
+    });
+  }
+
+  // ---- Progress ----
+  function showProgress(visible, label = '', pct = 0) {
+    const wrap = document.getElementById('progress-wrap');
+    const fill = document.getElementById('progress-fill');
+    const lbl = document.getElementById('progress-label');
+    wrap.classList.toggle('visible', visible);
+    fill.style.width = `${pct}%`;
+    lbl.textContent = label;
+  }
+
+  // ---- How it works ----
+  function toggleHow() {
+    const btn = document.getElementById('how-toggle');
+    const body = document.getElementById('how-body');
+    const open = body.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  }
+
+  // ---- Toast ----
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('visible'), 5000);
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  init();
+</script>
+</body>
+</html>
