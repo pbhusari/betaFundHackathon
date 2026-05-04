@@ -31,7 +31,7 @@ Gazebo sim frame  ──►  Z.AI Scenario Reasoner  ──►  Seedance 2.0 Ref
 
 ### Generated variant — *"wildfire smoke layer at dusk over forest"*
 
-https://github.com/pbhusari/betaFundHackathon/raw/main/demo_assets/demo.mp4
+<video src="https://github.com/pbhusari/betaFundHackathon/raw/main/demo_assets/demo.mp4" controls width="100%"></video>
 
 > *Aerial drone footage, wildfire smoke layer at dusk over forest. Slow gentle drone orbit at constant altitude, smooth circular pan, camera always locked toward the scene center. Real-time speed only — strictly NO timelapse, NO hyperlapse, NO fast motion. ONE single uninterrupted continuous shot.*
 
