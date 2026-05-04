@@ -40,9 +40,7 @@ ArduPilot SITL + Gazebo gives free synthetic trajectories, but the renders look 
 
 <div align="center">
 
-<video src="https://github.com/pbhusari/betaFundHackathon/raw/main/demo_assets/demo.mp4" controls width="100%"></video>
-
-[▶ Watch on Google Drive](https://drive.google.com/file/d/1Vsh4-VZeXwW4y8L5ZLh8a_gp2pWYhfgN/view?usp=sharing)
+https://drive.google.com/file/d/1Vsh4-VZeXwW4y8L5ZLh8a_gp2pWYhfgN/view?usp=sharing
 
 </div>
 
