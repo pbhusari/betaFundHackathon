@@ -42,6 +42,8 @@ ArduPilot SITL + Gazebo gives free synthetic trajectories, but the renders look 
 
 <video src="https://github.com/pbhusari/betaFundHackathon/raw/main/demo_assets/demo.mp4" controls width="100%"></video>
 
+[▶ Watch on Google Drive](https://drive.google.com/file/d/1Vsh4-VZeXwW4y8L5ZLh8a_gp2pWYhfgN/view?usp=sharing)
+
 </div>
 
 > *Aerial drone footage, wildfire smoke layer at dusk over forest. Slow gentle drone orbit at constant altitude, smooth circular pan, camera always locked toward the scene center. Real-time speed only — strictly NO timelapse, NO hyperlapse, NO fast motion. ONE single uninterrupted continuous shot.*
