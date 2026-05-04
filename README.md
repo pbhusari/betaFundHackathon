@@ -29,9 +29,11 @@ Gazebo sim frame  ──►  Z.AI Scenario Reasoner  ──►  Seedance 2.0 Ref
 
 ![Gazebo sim frame](frontend/highwayflyover.png)
 
-### Prompt: *"dust storm at low sun angle over desert highway"*
+### Generated variant — *"wildfire smoke layer at dusk over forest"*
 
-> *Aerial drone footage, dust storm at low sun angle over desert highway. Slow gentle drone orbit at constant altitude, smooth circular pan, camera locked toward scene center. Real-time speed, continuous uncut shot.*
+https://github.com/pbhusari/betaFundHackathon/raw/main/demo_assets/demo.mp4
+
+> *Aerial drone footage, wildfire smoke layer at dusk over forest. Slow gentle drone orbit at constant altitude, smooth circular pan, camera always locked toward the scene center. Real-time speed only — strictly NO timelapse, NO hyperlapse, NO fast motion. ONE single uninterrupted continuous shot.*
 
 Generated variants include structured scenario metadata automatically expanded by Z.AI:
 
@@ -129,10 +131,9 @@ USE_CACHE=true                     # serve pre-generated results instantly
 ## Built By
 
 **Pranav Bhusari** — Security + ML Engineer  
-Ex-Cromulence / Parsons (DARPA/NSA-adjacent CNO) · MS Purdue CERIAS · Ex-LLNL / Peraton / Alif  
-Operating: **Purdue Analytics LLC** (Mirage cyber range · Dragnet ICS honeypot · Kaiju RE+LLM tooling)
+MS Purdue CERIAS · Ex-LLNL / Peraton / Alif  
 
-Direct experience with synthetic data pipelines, sim environments, and the defense/dual-use buyer.
+Direct experience with synthetic data pipelines, simulation environments, and the defense/dual-use buyer.
 
 🔗 [linkedin.com/in/pranav-bhusari](https://www.linkedin.com/in/pranav-bhusari)
 
