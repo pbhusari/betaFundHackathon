@@ -1,54 +1,71 @@
-# SkyAugment — Aerial Edge-Case Generator
+<div align="center">
 
-> **Photorealistic drone footage variants from simulation data — powered by Seedance 2.0 + Z.AI**
+# 🛸
 
-Built at the **Beta Super Hackathon** · May 2, 2026 · Computer History Museum · Track 4: Physical AI + Simulation
+# SkyAugment
+
+**Photorealistic drone footage variants from simulation data**
+
+*Powered by Seedance 2.0 + Z.AI*
+
+[![Built at Beta Hackathon](https://img.shields.io/badge/Beta_Super_Hackathon-May_2026-blue?style=flat-square)](https://betafund.com)
+[![Track](https://img.shields.io/badge/Track_4-Physical_AI_%2B_Simulation-purple?style=flat-square)](#)
+[![Cost](https://img.shields.io/badge/Cost_per_clip-%240.50-green?style=flat-square)](#)
+
+[Problem](#-the-problem) • [Demo](#-demo) • [How It Works](#-how-it-works) • [Quickstart](#-quickstart) • [Use Cases](#-use-cases) • [Roadmap](#-roadmap)
+
+</div>
 
 ---
 
-## The Problem
+## 🔥 The Problem
 
-Drone perception teams are blocked on training data diversity. Real flight hours cost **$200–$2,000/hr**, and rare conditions — dust storms, dense fog, wildfire smoke — are expensive or dangerous to capture. ArduPilot SITL + Gazebo gives free synthetic trajectories, but the renders look like a video game. Models trained on them don't generalize to real-world sensor characteristics.
+Drone perception teams are blocked on training data diversity. Real flight hours cost **$200–$2,000/hr**, and rare conditions — dust storms, dense fog, wildfire smoke — are expensive or dangerous to capture.
 
-## The Solution
+ArduPilot SITL + Gazebo gives free synthetic trajectories, but the renders look like a video game. Models trained on them don't generalize to real-world sensor characteristics.
 
-Drop a simulation frame. Type a scenario. Get **N labeled photorealistic variants** in 60 seconds.
+---
+
+## 🎬 Demo
+
+### Input — ArduPilot/Gazebo sim frame
+
+<div align="center">
+
+![Gazebo sim frame](frontend/highwayflyover.png)
+
+</div>
+
+### Generated variant — *"wildfire smoke layer at dusk over forest"*
+
+<div align="center">
+
+<video src="https://github.com/pbhusari/betaFundHackathon/raw/main/demo_assets/demo.mp4" controls width="100%"></video>
+
+</div>
+
+> *Aerial drone footage, wildfire smoke layer at dusk over forest. Slow gentle drone orbit at constant altitude, smooth circular pan, camera always locked toward the scene center. Real-time speed only — strictly NO timelapse, NO hyperlapse, NO fast motion. ONE single uninterrupted continuous shot.*
+
+<div align="center">
+
+| | |
+|---|---|
+| 💡 **Lighting** | Harsh backlight from low sun angle, 18% particulate haze, warm orange tones |
+| 🌪️ **Weather** | Dust storm with 40 mph sustained winds, horizontal visibility 150 m |
+| 🏜️ **Terrain** | Arid desert highway, sand dunes flanking both sides, rocky outcrops |
+| 🕕 **Time of day** | Golden hour, ~18:00 local, sun at 10° elevation |
+| 🌫️ **Atmospheric effects** | PM10 dust veil at 0–300 m AGL, airborne sand particles |
+| 📷 **Camera artifacts** | Lens flare from sun angle, slight overexposure on horizon |
+
+</div>
+
+---
+
+## ⚙️ How It Works
 
 ```
 Gazebo sim frame  ──►  Z.AI Scenario Reasoner  ──►  Seedance 2.0 Reference-to-Video  ──►  Labeled footage
 ```
-
-**Real flight data:** ~$500/hr  
-**SkyAugment:** ~$0.50/clip
-
----
-
-## Demo
-
-### Input: ArduPilot/Gazebo sim frame
-
-![Gazebo sim frame](frontend/highwayflyover.png)
-
-### Generated variant — *"wildfire smoke layer at dusk over forest"*
-
-<video src="https://github.com/pbhusari/betaFundHackathon/raw/main/demo_assets/demo.mp4" controls width="100%"></video>
-
-> *Aerial drone footage, wildfire smoke layer at dusk over forest. Slow gentle drone orbit at constant altitude, smooth circular pan, camera always locked toward the scene center. Real-time speed only — strictly NO timelapse, NO hyperlapse, NO fast motion. ONE single uninterrupted continuous shot.*
-
-Generated variants include structured scenario metadata automatically expanded by Z.AI:
-
-| Parameter | Value |
-|---|---|
-| **Lighting** | Harsh backlight from low sun angle, 18% particulate haze, warm orange tones |
-| **Weather** | Dust storm with 40 mph sustained winds, horizontal visibility 150 m |
-| **Terrain** | Arid desert highway, sand dunes flanking both sides, rocky outcrops |
-| **Time of day** | Golden hour, ~18:00 local, sun at 10° elevation |
-| **Atmospheric effects** | PM10 dust veil at 0–300 m AGL, airborne sand particles |
-| **Camera artifacts** | Lens flare from sun angle, slight overexposure on horizon |
-
----
-
-## How It Works
 
 ```
 ┌──────────────────┐     ┌─────────────────────────┐     ┌──────────────────────────┐
@@ -66,11 +83,24 @@ Generated variants include structured scenario metadata automatically expanded b
                                                           └──────────────────────────┘
 ```
 
-The **Z.AI Scenario Reasoner** is the agentic layer — it takes a vague edge-case description and expands it into a precise, structured environmental spec that Seedance can condition on. This is not a UI wrapper; the agent reasons over lighting physics, atmospheric optics, and sensor characteristics to produce diversity-maximizing variants.
+The **Z.AI Scenario Reasoner** is the agentic layer — it takes a vague edge-case description and expands it into a precise, structured environmental spec that Seedance can condition on. The agent reasons over lighting physics, atmospheric optics, and sensor characteristics to produce diversity-maximizing variants.
+
+<div align="center">
+
+```
+┌─────────────────────────────────────┐
+│  Real flight data       $500 / hr   │
+│  SkyAugment              $0.50 / clip│
+│  Time to first clip       ~60 sec   │
+│  Labeled metadata           ✓ auto  │
+└─────────────────────────────────────┘
+```
+
+</div>
 
 ---
 
-## Quickstart
+## 🚀 Quickstart
 
 ```bash
 git clone <repo>
@@ -92,30 +122,30 @@ USE_CACHE=true                     # serve pre-generated results instantly
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Layer | Tech |
 |---|---|
-| Video generation | Seedance 2.0 (`dreamina-seedance-2-0-fast-260128`) via BytePlus Ark |
-| Scenario reasoning | Z.AI GLM-4 via Anthropic-compatible API |
-| Backend | FastAPI + async httpx polling |
-| Frontend | Vanilla HTML/CSS/JS — no build step |
-| Cache | JSON + local MP4 with ffmpeg faststart |
+| 🎥 Video generation | Seedance 2.0 (`dreamina-seedance-2-0-fast-260128`) via BytePlus Ark |
+| 🧠 Scenario reasoning | Z.AI GLM-4 via Anthropic-compatible API |
+| ⚡ Backend | FastAPI + async httpx polling |
+| 🖥️ Frontend | Vanilla HTML/CSS/JS — no build step |
+| 💾 Cache | JSON + local MP4 with ffmpeg faststart |
 
 ---
 
-## Use Cases
+## 🎯 Use Cases
 
-- **Drone perception training data** — generate rare atmospheric conditions at scale
-- **Autonomous vehicle sensor simulation** — photorealistic camera artifacts for model robustness
-- **Defense/ISR** — edge-case augmentation for target detection under degraded visibility
-- **ArduPilot community** — plug-and-play with existing SITL workflows
+- 🚁 **Drone perception training data** — generate rare atmospheric conditions at scale
+- 🚗 **Autonomous vehicle sensor simulation** — photorealistic camera artifacts for model robustness
+- 🛡️ **Defense/ISR** — edge-case augmentation for target detection under degraded visibility
+- 🔧 **ArduPilot community** — plug-and-play with existing SITL workflows
 
-**Named buyers:** Anduril, Shield AI, Skydio, Zipline, Percepto, DoD test ranges
+**Named buyers:** Anduril · Shield AI · Skydio · Zipline · Percepto · DoD test ranges
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
 | Timeline | Milestone |
 |---|---|
@@ -128,10 +158,13 @@ USE_CACHE=true                     # serve pre-generated results instantly
 
 ---
 
-## Built By
+<div align="center">
 
-**Pranav Bhusari** — Security + ML Engineer  
-MS Purdue CERIAS · Ex-LLNL / Peraton / Alif  
+## 👤 Built By
+
+**Pranav Bhusari** — Security + ML Engineer
+
+MS Purdue CERIAS · Ex-LLNL / Peraton / Alif
 
 Direct experience with synthetic data pipelines, simulation environments, and the defense/dual-use buyer.
 
@@ -140,3 +173,5 @@ Direct experience with synthetic data pipelines, simulation environments, and th
 ---
 
 *Submitted to Beta Super Hackathon · Track 4: Physical AI + Simulation · Submission code: butterbase0502*
+
+</div>
